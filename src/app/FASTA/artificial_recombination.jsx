@@ -2,15 +2,12 @@ import React, { Component } from "react";
 import { text } from "d3-fetch";
 import { AxisTop } from "d3-react-axis";
 import * as d3 from "d3";
-
 import fastaParser from "../../helpers/fasta";
 import BaseSVGAlignment from "../../components/BaseSVGAlignment.jsx";
 import { BaseSequenceAxis } from "../../components/SequenceAxis.jsx";
 import Button from "../../components/Button.jsx";
 import { save as saveSVG } from "d3-save-svg";
-import { saveSvgAsPng as savePNG } from "save-svg-as-png";
 import { nucleotide_colors } from "../../helpers/colors";
-
 var references = fastaParser(`>89.6
 AAGCCGAGGGGAACTAATTA
 >HXB2
@@ -67,7 +64,6 @@ AGACAAATAT----------
 superreads.forEach((sr, i) => {
   sr.header = "superread-" + (i + 1);
 });
-
 function AR() {
   const site_size = 20,
     number_of_sequences = 25,
@@ -94,12 +90,14 @@ function AR() {
         <h1>Artificial Recombination</h1>
         <Button
           label="Save as PNG"
-          onClick={() =>
-            savePNG(
+          onClick={async () => {
+            const import_save_svg_as_png = await import("save-svg-as-png");
+            const savePNG = import_save_svg_as_png.saveSvgAsPng;
+            return savePNG(
               document.getElementById("alignment-js-svg"),
               "alignment.png"
-            )
-          }
+            );
+          }}
         />
       </div>
 
@@ -186,5 +184,4 @@ function AR() {
     </div>
   );
 }
-
 export default AR;

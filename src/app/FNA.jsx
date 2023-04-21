@@ -1,7 +1,5 @@
 import React, { Component } from "react";
 import { text } from "d3-fetch";
-import { saveAs } from "file-saver";
-
 import TreeAlignment from "../TreeAlignment.jsx";
 import { fnaParser, fnaToText } from "../helpers/fasta";
 import { BaseSVGTreeInstance } from "./Components.jsx";
@@ -9,15 +7,12 @@ import Button from "../components/Button.jsx";
 import FileUploadButton from "./FileUploadButton.jsx";
 import Modal from "./Modal.jsx";
 import { nucleotide_color, nucleotide_difference } from "../helpers/colors";
-
 function Immunology(props) {
   return <h1>Immunology example will go here.</h1>;
 }
-
 function HIV(props) {
   return <h1>HIV example will go here.</h1>;
 }
-
 class FNAViewer extends Component {
   constructor(props) {
     super(props);
@@ -36,7 +31,9 @@ class FNAViewer extends Component {
       show_differences: ""
     });
   }
-  saveFNA() {
+  async saveFNA() {
+    const import_file_saver = await import("file-saver");
+    const saveAs = import_file_saver.saveAs;
     const blob = new Blob([fnaToText(this.state.data)], {
       type: "text/plain:charset=utf-8;"
     });
@@ -101,7 +98,11 @@ class FNAViewer extends Component {
               min={15}
               max={100}
               step={5}
-              onChange={e => this.setState({ site_size: e.target.value })}
+              onChange={e =>
+                this.setState({
+                  site_size: e.target.value
+                })
+              }
             />
           </span>
           <span>
@@ -109,7 +110,9 @@ class FNAViewer extends Component {
             <select
               value={this.state.show_differences}
               onChange={e =>
-                this.setState({ show_differences: e.target.value })
+                this.setState({
+                  show_differences: e.target.value
+                })
               }
             >
               <option value={""}>None</option>
@@ -124,8 +127,14 @@ class FNAViewer extends Component {
           site_color={this.siteColor()}
         />
         <Modal title="Export fasta">
-          <Button label="Download" onClick={() => this.saveFNA()} />
-          <div style={{ overflowY: "scroll", width: 400, height: 400 }}>
+          <Button label="Download" onClick={async () => await this.saveFNA()} />
+          <div
+            style={{
+              overflowY: "scroll",
+              width: 400,
+              height: 400
+            }}
+          >
             <p>{this.state.data ? fnaToText(this.state.data) : null}</p>
           </div>
         </Modal>
@@ -133,5 +142,4 @@ class FNAViewer extends Component {
     );
   }
 }
-
 export { FNAViewer, Immunology, HIV, BaseSVGTreeInstance };

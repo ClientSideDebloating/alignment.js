@@ -1,14 +1,11 @@
 import React, { Component } from "react";
 import { text } from "d3-fetch";
-
 import fastaParser from "../../helpers/fasta";
 import BaseSVGAlignment from "../../components/BaseSVGAlignment.jsx";
 import { BaseSequenceAxis } from "../../components/SequenceAxis.jsx";
 import Button from "../../components/Button.jsx";
 import { save as saveSVG } from "d3-save-svg";
-import { saveSvgAsPng as savePNG } from "save-svg-as-png";
 import { nucleotide_colors } from "../../helpers/colors";
-
 const desired_fasta = fastaParser(`>Reference
 GTCACAATAAAGATAGGGGGGCAACTAAAGGAAGTTCTATTAGATACAGGAGCAGAT
 >Red strain
@@ -85,7 +82,6 @@ GTCACAATAAAGGTAGGAGGGCAACTAAAGGAAGCTCTATTAGATACAGGAGCAGAT `),
     record.header = "Read " + (i + 1);
     return record;
   });
-
 function Intrahost() {
   const site_size = 15,
     reference_width = 100,
@@ -99,12 +95,14 @@ function Intrahost() {
         <h1>Intrahost variation</h1>
         <Button
           label="Save as PNG"
-          onClick={() =>
-            savePNG(
+          onClick={async () => {
+            const import_save_svg_as_png = await import("save-svg-as-png");
+            const savePNG = import_save_svg_as_png.saveSvgAsPng;
+            return savePNG(
               document.getElementById("alignment-js-svg"),
               "alignment.png"
-            )
-          }
+            );
+          }}
         />
       </div>
 
@@ -254,5 +252,4 @@ function Intrahost() {
     </div>
   );
 }
-
 export default Intrahost;

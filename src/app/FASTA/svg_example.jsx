@@ -1,11 +1,9 @@
 import React, { Component } from "react";
 import { text } from "d3-fetch";
-
 import fastaParser from "../../helpers/fasta";
 import SVGAlignment from "../../SVGAlignment.jsx";
 import Button from "../../components/Button.jsx";
-import { save as saveSVG } from "d3-save-svg";
-import { saveSvgAsPng as savePNG } from "save-svg-as-png";
+import "regenerator-runtime/runtime"; // Needed to resolve some issue with webpack / React / async functions.
 
 class SVGAlignmentExample extends Component {
   constructor(props) {
@@ -14,10 +12,14 @@ class SVGAlignmentExample extends Component {
       sequence_data: null
     };
   }
-  savePNG() {
+  async savePNG() {
+    const import_save_svg_as_png = await import("save-svg-as-png");
+    const savePNG = import_save_svg_as_png.saveSvgAsPng;
     savePNG(document.getElementById("alignment-js-svg"), "alignment.png");
   }
-  saveSVG() {
+  async saveSVG() {
+    const import_d3_save_svg = await import("d3-save-svg");
+    const saveSVG = import_d3_save_svg.save;
     saveSVG.save(document.getElementById("alignment-js-svg"), {
       filename: "alignment.svg"
     });
@@ -25,7 +27,9 @@ class SVGAlignmentExample extends Component {
   componentDidMount() {
     text("data/CD2-slim.fasta").then(data => {
       const sequence_data = fastaParser(data);
-      this.setState({ sequence_data });
+      this.setState({
+        sequence_data
+      });
     });
   }
   render() {
@@ -33,8 +37,14 @@ class SVGAlignmentExample extends Component {
       <div>
         <div>
           <h1>SVG Alignment</h1>
-          <Button label="Save as SVG" onClick={() => this.saveSVG()} />
-          <Button label="Save as PNG" onClick={() => this.savePNG()} />
+          <Button
+            label="Save as SVG"
+            onClick={async () => await this.saveSVG()}
+          />
+          <Button
+            label="Save as PNG"
+            onClick={async () => await this.savePNG()}
+          />
         </div>
 
         <SVGAlignment sequence_data={this.state.sequence_data} />
@@ -42,5 +52,4 @@ class SVGAlignmentExample extends Component {
     );
   }
 }
-
 export default SVGAlignmentExample;

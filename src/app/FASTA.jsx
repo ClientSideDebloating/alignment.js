@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import { text } from "d3-fetch";
-import { saveAs } from "file-saver";
 import { saveSvgAsPng as savePNG } from "save-svg-as-png";
-
 import fastaParser, { fastaToText } from "../helpers/fasta";
 import Alignment from "../Alignment.jsx";
 import Button from "../components/Button.jsx";
@@ -20,7 +18,6 @@ import SequenceBarChart from "./FASTA/sequence_bar_chart.jsx";
 import SiteStackedBarChart from "./FASTA/site_stacked_bar_chart.jsx";
 import ArtificialRecombination from "./FASTA/artificial_recombination.jsx";
 import ClickAndHover from "./FASTA/click_and_hover.jsx";
-
 class FASTAViewer extends Component {
   constructor(props) {
     super(props);
@@ -40,7 +37,9 @@ class FASTAViewer extends Component {
       show_differences: ""
     });
   }
-  saveFASTA() {
+  async saveFASTA() {
+    const import_file_saver = await import("file-saver");
+    const saveAs = import_file_saver.saveAs;
     const blob = new Blob([fastaToText(this.state.data)], {
       type: "text/plain:charset=utf-8;"
     });
@@ -99,16 +98,28 @@ class FASTAViewer extends Component {
       trimmed_sequence_data = this.trimData(start_site, end_site);
     trimmed_sequence_data.number_of_sequences = trimmed_sequence_data.length;
     trimmed_sequence_data.number_of_sites = trimmed_sequence_data[0].seq.length;
-    this.setState({ saving, trimmed_sequence_data, axis_bounds }, () => {
-      savePNG(document.getElementById("alignment-js-svg"), "alignment.png");
-      this.setState({ saving: false }, () => {
-        this.scrollExcavator.broadcaster.broadcast(
-          x_fraction,
-          y_fraction,
-          "main"
+    this.setState(
+      {
+        saving,
+        trimmed_sequence_data,
+        axis_bounds
+      },
+      () => {
+        savePNG(document.getElementById("alignment-js-svg"), "alignment.png");
+        this.setState(
+          {
+            saving: false
+          },
+          () => {
+            this.scrollExcavator.broadcaster.broadcast(
+              x_fraction,
+              y_fraction,
+              "main"
+            );
+          }
         );
-      });
-    });
+      }
+    );
   };
   render() {
     const toolbar_style = {
@@ -140,7 +151,11 @@ class FASTAViewer extends Component {
               min={15}
               max={100}
               step={5}
-              onChange={e => this.setState({ site_size: e.target.value })}
+              onChange={e =>
+                this.setState({
+                  site_size: e.target.value
+                })
+              }
             />
           </span>
           <span>
@@ -148,7 +163,9 @@ class FASTAViewer extends Component {
             <select
               value={this.state.show_differences}
               onChange={e =>
-                this.setState({ show_differences: e.target.value })
+                this.setState({
+                  show_differences: e.target.value
+                })
               }
             >
               <option value={""}>None</option>
@@ -176,8 +193,17 @@ class FASTAViewer extends Component {
           )}
         </div>
         <Modal title="Export fasta">
-          <Button label="Download" onClick={() => this.saveFASTA()} />
-          <div style={{ overflowY: "scroll", width: 400, height: 400 }}>
+          <Button
+            label="Download"
+            onClick={async () => await this.saveFASTA()}
+          />
+          <div
+            style={{
+              overflowY: "scroll",
+              width: 400,
+              height: 400
+            }}
+          >
             <p>{this.state.data ? fastaToText(this.state.data) : null}</p>
           </div>
         </Modal>
@@ -185,7 +211,6 @@ class FASTAViewer extends Component {
     );
   }
 }
-
 export {
   FASTAViewer,
   AminoAcid,
